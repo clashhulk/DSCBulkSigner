@@ -7,6 +7,7 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: true,
       enableRemoteModule: true,
+      devTools: process.env.NODE_ENV !== "production",
     },
   });
 
