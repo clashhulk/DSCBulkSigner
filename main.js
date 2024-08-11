@@ -6,15 +6,16 @@ function createWindow() {
     height: 600,
     webPreferences: {
       nodeIntegration: true,
+      enableRemoteModule: true, // Adjust this according to your Electron version and needs
     },
   });
 
   win.loadFile("index.html");
 
-  // Only open DevTools if NOT in production
-  if (process.env.NODE_ENV !== "production") {
-    win.webContents.openDevTools();
-  }
+  win.setMenu(null);
+
+  // win.setMenuBarVisibility(false);
+  // win.setAutoHideMenuBar(true);
 }
 
 app.whenReady().then(createWindow);
