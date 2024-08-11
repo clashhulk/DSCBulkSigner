@@ -6,7 +6,7 @@ function createWindow() {
     height: 600,
     webPreferences: {
       nodeIntegration: true,
-      enableRemoteModule: true, // Adjust this according to your Electron version and needs
+      enableRemoteModule: true,
     },
   });
 
