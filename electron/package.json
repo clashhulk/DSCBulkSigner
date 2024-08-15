@@ -3,6 +3,16 @@
   "version": "1.0.0",
   "description": "",
   "main": "main.js",
+  "build": {
+    "appId": "com.dscbulksigner.id",
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb",
+        "rpm"
+      ]
+    }
+  },
   "scripts": {
     "start": "electron .",
     "build": "electron .",
