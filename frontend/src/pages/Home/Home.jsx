@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./styles.css";
 import Header from "../../components/header/Header";
+import Operations from '../../Operations';
 import {
   Table,
   TableBody,
@@ -9,10 +10,7 @@ import {
   TableHead,
   TableRow,
   Paper,
-  FormControl,
-  OutlinedInput,
-  FormHelperText,
-  Button,
+ 
   IconButton,
   Fab,
   Tooltip,
@@ -22,10 +20,10 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import Preview from "../../Preview";
 
 const Home = () => {
-  const [sourceFolder, setSourceFolder] = useState("");
-  const [destinationFolder, setDestinationFolder] = useState("");
+ 
   const [templates, setTemplates] = useState([]);
 
   useEffect(() => {
@@ -144,44 +142,12 @@ const Home = () => {
 
         <div className="operations-grid">
           <form className="operations-form">
-            <FormControl
-              fullWidth
-              variant="outlined"
-              size="small"
-              style={{ marginBottom: "20px" }}
-            >
-              {/* <InputLabel htmlFor="source-folder">Source Folder</InputLabel> */}
-              <OutlinedInput
-                id="source-folder"
-                type="file"
-                inputProps={{ directory: "true", webkitdirectory: "true" }}
-                onChange={(e) => handleFolderChange(e, setSourceFolder)}
-                label="Source Folder"
-              />
-              <FormHelperText>Select a source directory</FormHelperText>
-            </FormControl>
+           
+            <Operations />
+            < Preview/>
 
-            <FormControl fullWidth variant="outlined" size="small">
-              {/* <InputLabel htmlFor="destination-folder">
-                Destination Folder
-              </InputLabel> */}
-              <OutlinedInput
-                id="destination-folder"
-                type="file"
-                inputProps={{ directory: "true", webkitdirectory: "true" }}
-                onChange={(e) => handleFolderChange(e, setDestinationFolder)}
-                label="Destination Folder"
-              />
-              <FormHelperText>Select a destination directory</FormHelperText>
-            </FormControl>
           </form>
-          <Button
-            variant="contained"
-            color="primary"
-            style={{ alignSelf: "flex-end" }}
-          >
-            Move
-          </Button>
+          
         </div>
       </div>
     </>
