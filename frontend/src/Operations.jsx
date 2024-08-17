@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button, Grid, Typography } from '@mui/material';
 
-const FolderPathsInput = () => {
+const Operations = () => {
   const [sourcePath, setSourcePath] = useState('');
   const [destinationPath, setDestinationPath] = useState('');
   const [status, setStatus] = useState('');
@@ -69,4 +69,4 @@ const FolderPathsInput = () => {
   );
 };
 
-export default FolderPathsInput;
+export default Operations;

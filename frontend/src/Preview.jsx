@@ -11,7 +11,7 @@ const Preview = () => {
     if (file) {
       setSelectedFile(file);
       setPreviewUrl(URL.createObjectURL(file));
-      setShowPreview(false); // Reset preview visibility when a new file is selected
+      setShowPreview(false); 
     }
   };
 
@@ -20,11 +20,11 @@ const Preview = () => {
       alert('No file selected.');
       return;
     }
-    setShowPreview(true); // Show the preview
+    setShowPreview(true); 
   };
 
   const handleCancelClick = () => {
-    setShowPreview(false); // Hide the preview
+    setShowPreview(false); // 
   };
 
   return (
@@ -63,8 +63,8 @@ const Preview = () => {
             sx={{
               border: '1px solid #ccc',
               padding: 2,
-              width: '50%',       // Decrease width
-              height: '70vh',      // Increase height
+              width: '60%',   
+              height: '70vh',      
               maxHeight: '70vh',
               display: 'flex',
               alignItems: 'center',
