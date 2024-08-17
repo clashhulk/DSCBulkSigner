@@ -1,0 +1,26 @@
+.template-list-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 18px;
+}
+.template-table-title {
+  font-size: 20px;
+}
+th.compact-table-cell {
+  padding: 8px;
+  font-size: 14px;
+  color: #4d3e85;
+}
+td.compact-table-cell {
+  padding: 4px 8px;
+  font-size: 14px;
+  color: #333;
+}
+.template-grid {
+  flex: 0 0 33.333%;
+  padding: 20px;
+  margin-top: 50px;
+  box-sizing: border-box;
+  overflow-y: auto;
+}

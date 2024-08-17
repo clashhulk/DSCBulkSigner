@@ -1,13 +1,8 @@
 import './styles.css';
 
-import AccountCircle from '@mui/icons-material/AccountCircle';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
-import IconButton from '@mui/material/IconButton';
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
 import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
 import * as React from 'react';
 
 export default function Header() {
@@ -30,10 +25,8 @@ export default function Header() {
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static" className="white-app-bar">
         <Toolbar className="custom-toolbar">
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Infinity Signer
-          </Typography>
-          {auth && (
+          DSC Sign Master
+          {/* {auth && (
             <div>
               <IconButton
                 size="large"
@@ -64,7 +57,7 @@ export default function Header() {
                 <MenuItem onClick={handleClose}>My account</MenuItem>
               </Menu>
             </div>
-          )}
+          )} */}
         </Toolbar>
       </AppBar>
     </Box>

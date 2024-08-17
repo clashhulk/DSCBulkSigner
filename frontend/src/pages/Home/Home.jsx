@@ -1,156 +1,144 @@
-import React, { useState, useEffect } from "react";
-import "./styles.css";
-import Header from "../../components/header/Header";
-import Operations from '../../Operations';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
- 
-  IconButton,
-  Fab,
-  Tooltip,
-} from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
-import Preview from "../../Preview";
+import React, { useEffect, useRef, useState } from 'react';
+import { Document, Page, pdfjs } from 'react-pdf';
 
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 const Home = () => {
- 
-  const [templates, setTemplates] = useState([]);
+  const [pdfFile, setPdfFile] = useState(null);
+  const [numPages, setNumPages] = useState(null);
+  const [signatureText, setSignatureText] = useState("");
+  const [pageNumber, setPageNumber] = useState(1);
+  const [signaturePosition, setSignaturePosition] = useState({ x: 50, y: 50 });
+  const signatureRef = useRef(null);
+
+  const onFileChange = (event) => {
+    setPdfFile(event.target.files[0]);
+  };
+
+  const onDocumentLoadSuccess = ({ numPages }) => {
+    setNumPages(numPages);
+  };
+
+  const handleSignatureChange = (event) => {
+    setSignatureText(event.target.value);
+  };
+
+  const onDragStart = (e) => {
+    const boundingRect = e.target.getBoundingClientRect();
+    e.dataTransfer.setData(
+      "text/plain",
+      JSON.stringify({
+        x: e.clientX - boundingRect.left,
+        y: e.clientY - boundingRect.top,
+      })
+    );
+  };
+
+  const onDrop = (e) => {
+    e.preventDefault();
+    const data = JSON.parse(e.dataTransfer.getData("text/plain"));
+    const rect = e.target.getBoundingClientRect();
+    setSignaturePosition({
+      x: e.clientX - rect.left - data.x,
+      y: e.clientY - rect.top - data.y,
+    });
+  };
+
+  const onDragOver = (e) => {
+    e.preventDefault();
+  };
+  const [certificates, setCertificates] = useState([]);
 
   useEffect(() => {
-    const defaultTemplates = [
-      { id: 1, templateName: "Yes Bank", ownerName: "Rohan Sharma" },
-      {
-        id: 2,
-        templateName: "Piramal Enterprises",
-        ownerName: "Sneha Chowdhury",
-      },
-    ];
-
-    const loadedTemplates = JSON.parse(localStorage.getItem("templates"));
-
-    if (!loadedTemplates || loadedTemplates.length === 0) {
-      localStorage.setItem("templates", JSON.stringify(defaultTemplates));
-      setTemplates(defaultTemplates);
+    if (window.electronAPI) {
+      window.electronAPI
+        .getDSCList()
+        .then((data) => {
+          if (Array.isArray(data)) {
+            setCertificates(data);
+          } else {
+            console.error("Expected an array but received:", data);
+          }
+        })
+        .catch(console.error);
     } else {
-      setTemplates(loadedTemplates);
+      console.error("window.electronAPI is undefined");
     }
   }, []);
-
-  const handleEditAlert = (templateName) => {
-    alert(`Editing ${templateName}`);
-  };
-  const navigate = useNavigate();
-
-  const handleAddNewTemplate = () => {
-    navigate("/template/crud");
-  };
-  const handleFolderChange = (event, setFolder) => {
-    if (event.target.files.length > 0) {
-      const path = event.target.files[0].webkitRelativePath;
-      const folder = path.substr(0, path.lastIndexOf("/"));
-      setFolder(folder);
-    }
-  };
-
-  useEffect(() => {
-    const loadedTemplates = JSON.parse(localStorage.getItem("templates")) || [];
-    setTemplates(loadedTemplates);
-  }, []);
-
-  const handleDelete = (id) => {
-    const updatedTemplates = templates.filter((template) => template.id !== id);
-    setTemplates(updatedTemplates);
-    localStorage.setItem("templates", JSON.stringify(updatedTemplates));
-    toast.success("Template deleted successfully!");
-  };
-
   return (
-    <>
-      <div className="home-container">
-        <div className="template-grid">
-          <TableContainer component={Paper}>
-            <div className="template-list-head">
-              <p className="template-table-title">Recent templates</p>
-              <Tooltip title="Add New Template">
-                <Fab
-                  size="small"
-                  color="primary"
-                  onClick={handleAddNewTemplate}
-                  className="small-fab"
-                >
-                  <AddIcon style={{ fontSize: "20px" }} />
-                </Fab>
-              </Tooltip>
-            </div>
-            <Table aria-label="template table">
-              <TableHead>
-                <TableRow>
-                  <TableCell className="compact-table-cell">
-                    Template Name
-                  </TableCell>
-                  <TableCell className="compact-table-cell">
-                    Owner Name
-                  </TableCell>
-                  <TableCell className="compact-table-cell" align="right">
-                    Actions
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {templates.map((template) => (
-                  <TableRow key={template.id}>
-                    <TableCell className="compact-table-cell">
-                      {template.templateName}
-                    </TableCell>
-                    <TableCell className="compact-table-cell">
-                      {template.ownerName}
-                    </TableCell>
-                    <TableCell className="compact-table-cell" align="right">
-                      <IconButton
-                        onClick={() =>
-                          navigate(`/template/crud?templateId=${template.id}`)
-                        }
-                        color="primary"
-                        className="small-icon-button"
-                      >
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton
-                        onClick={() => handleDelete(template.id)}
-                        color="secondary"
-                        className="small-icon-button"
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </div>
-
-        <div className="operations-grid">
-          <form className="operations-form">
-           
-            <Operations />
-            < Preview/>
-
-          </form>
-          
-        </div>
+    <div>
+      <div>
+        <h3>Digital Signature Certificates</h3>
+        <ul>
+          {certificates.map((cert, index) => (
+            <li key={index}>
+              <strong>Serial Number:</strong> {cert.serialNumber} <br />
+              <strong>Issuer:</strong> {cert.issuer} <br />
+              <strong>Valid From:</strong> {cert.validFrom} <br />
+              <strong>Valid To:</strong> {cert.validTo}
+            </li>
+          ))}
+        </ul>
       </div>
-    </>
+      <h1>Home Component</h1>
+
+      <input
+        type="text"
+        placeholder="Enter signature text"
+        value={signatureText}
+        onChange={handleSignatureChange}
+      />
+
+      <input type="file" accept="application/pdf" onChange={onFileChange} />
+
+      {pdfFile && (
+        <div
+          style={{
+            position: "relative",
+            border: "1px solid #ccc",
+            overflow: "hidden",
+            maxWidth: "800px",
+            margin: "auto",
+          }}
+          onDragOver={onDragOver}
+          onDrop={onDrop}
+        >
+          <Document
+            file={pdfFile}
+            onLoadSuccess={onDocumentLoadSuccess}
+            renderMode="canvas"
+            loading={<div>Loading PDF...</div>}
+            error={<div>Error loading PDF</div>}
+          >
+            <Page
+              pageNumber={pageNumber}
+              width={800}
+              renderAnnotationLayer={false}
+              renderTextLayer={false}
+            />
+          </Document>
+
+          {/* Draggable signature */}
+          {signatureText && (
+            <div
+              ref={signatureRef}
+              style={{
+                position: "absolute",
+                left: `${signaturePosition.x}px`,
+                top: `${signaturePosition.y}px`,
+                color: "red",
+                cursor: "move",
+                fontSize: "20px",
+                fontWeight: "bold",
+              }}
+              draggable
+              onDragStart={onDragStart}
+            >
+              {signatureText}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 };
 
