@@ -1,14 +1,28 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+
 const Home = () => {
   const [pdfFile, setPdfFile] = useState(null);
   const [numPages, setNumPages] = useState(null);
-  const [signatureText, setSignatureText] = useState("");
   const [pageNumber, setPageNumber] = useState(1);
   const [signaturePosition, setSignaturePosition] = useState({ x: 50, y: 50 });
-  const signatureRef = useRef(null);
+  const [certificates, setCertificates] = useState([]);
+  const [selectedCertificate, setSelectedCertificate] = useState(null);
+
+  useEffect(() => {
+    fetchCertificates();
+  }, []);
+
+  const fetchCertificates = async () => {
+    try {
+      const dscList = await window.electronAPI.getDSCList();
+      setCertificates(Array.isArray(dscList) ? dscList : []);
+    } catch (error) {
+      console.error("Error fetching certificates:", error);
+    }
+  };
 
   const onFileChange = (event) => {
     setPdfFile(event.target.files[0]);
@@ -18,8 +32,9 @@ const Home = () => {
     setNumPages(numPages);
   };
 
-  const handleSignatureChange = (event) => {
-    setSignatureText(event.target.value);
+  const handleCertificateSelect = (event) => {
+    const selectedIndex = event.target.value;
+    setSelectedCertificate(certificates[selectedIndex]);
   };
 
   const onDragStart = (e) => {
@@ -46,86 +61,84 @@ const Home = () => {
   const onDragOver = (e) => {
     e.preventDefault();
   };
-  const [certificates, setCertificates] = useState([]);
-
-  useEffect(() => {
-    if (window.electronAPI) {
-      window.electronAPI
-        .getDSCList()
-        .then((data) => {
-          if (Array.isArray(data)) {
-            setCertificates(data);
-          } else {
-            console.error("Expected an array but received:", data);
-          }
-        })
-        .catch(console.error);
-    } else {
-      console.error("window.electronAPI is undefined");
+  const signPDFWithDSC = async () => {
+    if (!selectedCertificate || !pdfFile) {
+      alert("Please select a certificate and upload a PDF file.");
+      return;
     }
-  }, []);
+
+    console.log("Signing PDF with details:", {
+      pdfPath: pdfFile.path, // Make sure pdfFile.path is a string
+      certificate: selectedCertificate,
+      position: signaturePosition,
+      pageNumber,
+    });
+
+    try {
+      const signatureResult = await window.electronAPI.signPDF({
+        pdfPath: pdfFile.path, // Ensure this is the correct path
+        certificate: selectedCertificate,
+        position: signaturePosition,
+        pageNumber,
+      });
+
+      if (signatureResult.success) {
+        alert("PDF signed successfully!");
+      } else {
+        alert("Failed to sign PDF: " + signatureResult.message);
+      }
+    } catch (error) {
+      console.error("Error signing PDF:", error);
+    }
+  };
+
   return (
-    <div>
-      <div>
+    <div style={{ display: "flex" }}>
+      <div style={{ width: "50%" }}>
+        <input type="file" accept="application/pdf" onChange={onFileChange} />
         <h3>Digital Signature Certificates</h3>
-        <ul>
+        <select onChange={handleCertificateSelect}>
+          <option value="">Select a Digital Signature Certificate</option>
           {certificates.map((cert, index) => (
-            <li key={index}>
-              <strong>Serial Number:</strong> {cert.serialNumber} <br />
-              <strong>Issuer:</strong> {cert.issuer} <br />
-              <strong>Valid From:</strong> {cert.validFrom} <br />
-              <strong>Valid To:</strong> {cert.validTo}
-            </li>
+            <option key={index} value={index}>
+              {cert.issuer} (Valid until {cert.validTo})
+            </option>
           ))}
-        </ul>
+        </select>
+        <button onClick={signPDFWithDSC}>Sign PDF with DSC</button>
       </div>
-      <h1>Home Component</h1>
-
-      <input
-        type="text"
-        placeholder="Enter signature text"
-        value={signatureText}
-        onChange={handleSignatureChange}
-      />
-
-      <input type="file" accept="application/pdf" onChange={onFileChange} />
-
-      {pdfFile && (
-        <div
-          style={{
-            position: "relative",
-            border: "1px solid #ccc",
-            overflow: "hidden",
-            maxWidth: "800px",
-            margin: "auto",
-          }}
-          onDragOver={onDragOver}
-          onDrop={onDrop}
-        >
-          <Document
-            file={pdfFile}
-            onLoadSuccess={onDocumentLoadSuccess}
-            renderMode="canvas"
-            loading={<div>Loading PDF...</div>}
-            error={<div>Error loading PDF</div>}
+      <div style={{ width: "50%" }}>
+        {pdfFile && (
+          <div
+            style={{
+              position: "relative",
+              border: "1px solid #ccc",
+              overflow: "auto",
+            }}
+            onDragOver={onDragOver}
+            onDrop={onDrop}
           >
-            <Page
-              pageNumber={pageNumber}
-              width={800}
-              renderAnnotationLayer={false}
-              renderTextLayer={false}
-            />
-          </Document>
-
-          {/* Draggable signature */}
-          {signatureText && (
+            <Document
+              file={pdfFile}
+              onLoadSuccess={onDocumentLoadSuccess}
+              renderMode="canvas"
+              loading={<div>Loading PDF...</div>}
+              error={<div>Error loading PDF</div>}
+            >
+              {/* {Array.from(new Array(numPages), (el, index) => (
+                <Page
+                  key={`page_${index + 1}`}
+                  pageNumber={index + 1}
+                  width={800}
+                />
+              ))} */}
+              <Page pageNumber={pageNumber} />
+            </Document>
             <div
-              ref={signatureRef}
               style={{
                 position: "absolute",
                 left: `${signaturePosition.x}px`,
                 top: `${signaturePosition.y}px`,
-                color: "red",
                 cursor: "move",
                 fontSize: "20px",
                 fontWeight: "bold",
@@ -133,11 +146,13 @@ const Home = () => {
               draggable
               onDragStart={onDragStart}
             >
-              {signatureText}
+              {selectedCertificate
+                ? selectedCertificate.issuer
+                : "No certificate selected"}
             </div>
-          )}
-        </div>
-      )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

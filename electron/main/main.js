@@ -3,7 +3,7 @@ const path = require("path");
 const { selectFolder, copyFiles } = require("./ipc/fileCopy");
 const { exec } = require("child_process");
 let mainWindow;
-
+const { signPDFDocument } = require("./signingModule");
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 800,
@@ -83,3 +83,28 @@ function parseCertificates(output) {
 
   return certArray;
 }
+ipcMain.handle(
+  "sign-pdf",
+  async (event, { pdfPath, certificate, position, pageNumber }) => {
+    console.log("Received PDF signing request with:", {
+      pdfPath,
+      certificate,
+      position,
+      pageNumber,
+    });
+
+    try {
+      const signatureResult = await signPDFDocument(
+        pdfPath,
+        certificate.certificatePath,
+        certificate.privateKeyPath,
+        position,
+        pageNumber
+      );
+      return { success: true, message: "PDF signed successfully" };
+    } catch (error) {
+      console.error("Error signing PDF:", error);
+      return { success: false, message: error.message };
+    }
+  }
+);

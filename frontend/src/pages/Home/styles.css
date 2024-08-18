@@ -43,3 +43,9 @@ button.small-fab {
   width: 35px;
   min-height: 35px;
 }
+.react-pdf__Page__textContent.textLayer {
+  display: none !important;
+}
+.react-pdf__Page__annotations.annotationLayer {
+  display: none !important;
+}
