@@ -6,4 +6,5 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.invoke("copy-files", source, destination),
   getDSCList: () => ipcRenderer.invoke("get-dsc-list"),
   signPDF: (pdfDetails) => ipcRenderer.invoke("sign-pdf", pdfDetails),
+  receiveCertificate: (callback) => ipcRenderer.on("certificate", callback),
 });

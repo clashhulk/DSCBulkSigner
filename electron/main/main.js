@@ -4,6 +4,9 @@ const { selectFolder, copyFiles } = require("./ipc/fileCopy");
 const { exec } = require("child_process");
 let mainWindow;
 const { signPDFDocument } = require("./signingModule");
+const ca = require("win-ca");
+
+const forge = require("node-forge");
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 800,
@@ -22,8 +25,10 @@ function createWindow() {
   });
 }
 
-app.on("ready", createWindow);
-
+app.on("ready", () => {
+  createWindow();
+  listCertificates();
+});
 app.on("window-all-closed", function () {
   if (process.platform !== "darwin") {
     app.quit();
@@ -108,3 +113,39 @@ ipcMain.handle(
     }
   }
 );
+
+function listCertificates() {
+  ca({
+    store: ["ROOT", "MY"],
+    ondata: (cert) => {
+      let pem = cert.toString("utf8").trim();
+      if (!pem.startsWith("-----BEGIN CERTIFICATE-----")) {
+        pem =
+          "-----BEGIN CERTIFICATE-----\n" + pem + "\n-----END CERTIFICATE-----";
+      }
+      console.log("Full PEM Data:", pem); // Detailed log to inspect the PEM data
+      try {
+        const certificate = forge.pki.certificateFromPem(pem);
+        mainWindow.webContents.send(
+          "certificate",
+          formatCertificate(certificate)
+        );
+      } catch (error) {
+        console.error("Error parsing certificate:", error);
+      }
+    },
+  });
+}
+function formatCertificate(cert) {
+  return {
+    subject: cert.subject.attributes
+      .map((attr) => `${attr.shortName}=${attr.value}`)
+      .join(", "),
+    issuer: cert.issuer.attributes
+      .map((attr) => `${attr.shortName}=${attr.value}`)
+      .join(", "),
+    validFrom: cert.validity.notBefore.toISOString(),
+    validTo: cert.validity.notAfter.toISOString(),
+    serialNumber: cert.serialNumber,
+  };
+}
