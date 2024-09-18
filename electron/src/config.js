@@ -1,4 +1,3 @@
-// src/config.js
 const WINDOW_OPTIONS = {
   width: 800,
   height: 600,

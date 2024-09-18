@@ -1,4 +1,3 @@
-// src/windowManager.js
 const { BrowserWindow } = require("electron");
 const path = require("path");
 const { WINDOW_OPTIONS } = require("./config");
