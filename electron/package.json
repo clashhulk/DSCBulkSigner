@@ -2,7 +2,7 @@
   "name": "electron",
   "version": "1.0.0",
   "description": "",
-  "main": "main/main.js",
+  "main": "src/main.js",
   "build": {
     "appId": "com.dscbulksigner.id",
     "linux": {

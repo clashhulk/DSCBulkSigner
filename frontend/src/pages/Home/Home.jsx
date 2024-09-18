@@ -23,8 +23,8 @@ const Home = () => {
   const [showImage, setShowImage] = useState(false);
   const [imageMode, setImageMode] = useState("imageAndText");
   const [boxDimensions, setBoxDimensions] = useState({
-    width: 100,
-    height: 100,
+    width: 15,
+    height: 8,
   });
   const [showBoxDimensions, setShowBoxDimensions] = useState(false);
 
@@ -103,6 +103,14 @@ const Home = () => {
     return fullSignature;
   };
 
+  const runPythonScript = async () => {
+    try {
+      const result = await window.api.runPythonScript();
+      console.log(result);
+    } catch (error) {
+      console.error("Error running Python script:", error);
+    }
+  };
   return (
     <div
       style={{
@@ -115,6 +123,7 @@ const Home = () => {
       <div
         style={{ width: "30%", padding: "20px", borderRight: "1px solid #ccc" }}
       >
+        <button onClick={runPythonScript}>Run Python Script</button>
         <h3>Signature Settings</h3>
 
         {/* Signature Text Input */}
