@@ -1,4 +1,3 @@
-// src/main.js
 const { app } = require("electron");
 const { createMainWindow } = require("./windowManager");
 const { setupIPCHandlers } = require("./ipcHandlers");
