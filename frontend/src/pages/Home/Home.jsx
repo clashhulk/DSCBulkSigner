@@ -7,13 +7,11 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/b
 const Home = () => {
   const [pdfFile, setPdfFile] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
-  const [signatureText, setSignatureText] = useState("John Doe");
+  const [signatureText, setSignatureText] = useState("Signature valid");
   const [signaturePosition, setSignaturePosition] = useState({ x: 50, y: 50 });
-  const [fontSize, setFontSize] = useState(20);
+  const [fontSize, setFontSize] = useState(12);
   const [showDateTime, setShowDateTime] = useState(false);
-  const [dateTimeFormat, setDateTimeFormat] = useState(
-    "MMMM Do YYYY, h:mm:ss a"
-  );
+  const [dateTimeFormat, setDateTimeFormat] = useState("DD-MMM-YYYY HH:mm Z");
   const [showCertificateSubject, setShowCertificateSubject] = useState(false);
   const [signingReason, setSigningReason] = useState("");
   const [showSigningReason, setShowSigningReason] = useState(false);
@@ -83,25 +81,62 @@ const Home = () => {
     }));
   };
 
-  const renderSignature = () => {
-    let fullSignature = signatureText;
+ const renderSignature = () => {
+   let dscName = (
+     <span style={{ textTransform:"uppercase",position:"absolute" }}>
+       Akshata Chandrashekhar Bhimnale
+     </span>
+   );
+   let dscTitle = (
+     <span style={{ fontWeight: "500", fontSize: "24px" }}>
+       Signature valid
+     </span>
+   ); // Larger and bold font for dscTitle
+   let fullSignature = (
+     <span>
+       {dscTitle}
+       {"\n"}Digitally signed by {dscName}
+     </span>
+   );
 
-    if (showCertificateSubject) {
-      fullSignature += "Certificate Subject";
-    }
-    if (showDateTime) {
-      const dateTime = moment().format(dateTimeFormat);
-      fullSignature += dateTime;
-    }
-    if (showSigningReason && signingReason) {
-      fullSignature += "Reason: " + signingReason;
-    }
-    if (showSigningLocation && signingLocation) {
-      fullSignature += "Location:" + signingLocation;
-    }
+   if (showCertificateSubject) {
+     fullSignature = (
+       <span>
+         {fullSignature}
+         {"\n"}Certificate Subject
+       </span>
+     );
+   }
+   if (showDateTime) {
+     const dateTime = moment().format(dateTimeFormat);
+     fullSignature = (
+       <span>
+         {fullSignature}
+         {"\n"}
+         {dateTime}
+       </span>
+     );
+   }
+   if (showSigningReason && signingReason) {
+     fullSignature = (
+       <span>
+         {fullSignature}
+         {"\n"}Reason: {signingReason}
+       </span>
+     );
+   }
+   if (showSigningLocation && signingLocation) {
+     fullSignature = (
+       <span>
+         {fullSignature}
+         {"\n"}Location: {signingLocation}
+       </span>
+     );
+   }
 
-    return fullSignature;
-  };
+   return fullSignature;
+ };
+
 
   const runPythonScript = async () => {
     try {
@@ -127,13 +162,6 @@ const Home = () => {
         <h3>Signature Settings</h3>
 
         {/* Signature Text Input */}
-        <input
-          type="text"
-          placeholder="Enter signature text"
-          value={signatureText}
-          onChange={(e) => setSignatureText(e.target.value)}
-          style={{ marginBottom: "10px", width: "100%" }}
-        />
 
         {/* Font Size Selector */}
         <div style={{ marginBottom: "10px" }}>
@@ -153,38 +181,6 @@ const Home = () => {
               ))}
           </select>
         </div>
-
-        {/* Show Date/Time Checkbox */}
-        <div style={{ marginBottom: "10px" }}>
-          <label>
-            <input
-              type="checkbox"
-              checked={showDateTime}
-              onChange={handleDateTimeCheckboxChange}
-            />
-            Show Sign Date/Time
-          </label>
-        </div>
-
-        {/* Date/Time Format Selector (only shows if checkbox is checked) */}
-        {showDateTime && (
-          <div style={{ marginBottom: "10px" }}>
-            <label>Date/Time Format:</label>
-            <select
-              value={dateTimeFormat}
-              onChange={handleDateTimeFormatChange}
-              style={{ marginLeft: "10px", width: "100%" }}
-            >
-              <option value="MMMM Do YYYY, h:mm:ss a">
-                MMMM Do YYYY, h:mm:ss a
-              </option>
-              <option value="YYYY-MM-DD HH:mm:ss">YYYY-MM-DD HH:mm:ss</option>
-              <option value="MM/DD/YYYY h:mm A">MM/DD/YYYY h:mm A</option>
-              <option value="dddd, MMMM Do YYYY">dddd, MMMM Do YYYY</option>
-              <option value="DD-MM-YYYY HH:mm">DD-MM-YYYY HH:mm</option>
-            </select>
-          </div>
-        )}
 
         {/* Show Certificate Subject Checkbox */}
         <div style={{ marginBottom: "10px" }}>
@@ -338,7 +334,37 @@ const Home = () => {
             </select>
           </div>
         )}
+        {/* Show Date/Time Checkbox */}
+        <div style={{ marginBottom: "10px" }}>
+          <label>
+            <input
+              type="checkbox"
+              checked={showDateTime}
+              onChange={handleDateTimeCheckboxChange}
+            />
+            Show Sign Date/Time
+          </label>
+        </div>
 
+        {/* Date/Time Format Selector (only shows if checkbox is checked) */}
+        {showDateTime && (
+          <div style={{ marginBottom: "10px" }}>
+            <label>Date/Time Format:</label>
+            <select
+              value={dateTimeFormat}
+              onChange={handleDateTimeFormatChange}
+              style={{ marginLeft: "10px", width: "100%" }}
+            >
+              <option value="DD-MMM-YYYY HH:mm Z">
+                DD-MMM-YYYY HH:mm Z
+              </option>
+              <option value="YYYY-MM-DD HH:mm:ss">YYYY-MM-DD HH:mm:ss</option>
+              <option value="MM/DD/YYYY h:mm A">MM/DD/YYYY h:mm A</option>
+              <option value="dddd, MMMM Do YYYY">dddd, MMMM Do YYYY</option>
+              <option value="DD-MM-YYYY HH:mm">DD-MM-YYYY HH:mm</option>
+            </select>
+          </div>
+        )}
         {/* PDF File Upload */}
         <input
           type="file"
@@ -385,17 +411,15 @@ const Home = () => {
                   position: "absolute",
                   left: `${signaturePosition.x}px`,
                   top: `${signaturePosition.y}px`,
-                  color: "red",
+                  color: "black",
                   cursor: "move",
                   fontSize: `${fontSize}px`,
-                  fontWeight: "bold",
                   whiteSpace: "pre",
                   width: `${boxDimensions.width}%`,
                   height: `${boxDimensions.height}%`,
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",
-                  textAlign: "center",
                   backgroundImage:
                     showImage &&
                     imageFile &&
@@ -405,7 +429,6 @@ const Home = () => {
                       : "none",
                   backgroundSize: "cover",
                   backgroundPosition: "center",
-                  border: "2px dashed #007bff", // Border around the signature box
                   backgroundColor: "rgba(255, 255, 255, 0.5)", // Light background for better visibility
                 }}
                 draggable
