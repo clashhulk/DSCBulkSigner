@@ -1,6 +1,6 @@
-import moment from 'moment';
-import React, { useRef, useState } from 'react';
-import { Document, Page, pdfjs } from 'react-pdf';
+import moment from "moment";
+import React, { useRef, useState } from "react";
+import { Document, Page, pdfjs } from "react-pdf";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -13,6 +13,7 @@ const Home = () => {
   const [showDateTime, setShowDateTime] = useState(false);
   const [dateTimeFormat, setDateTimeFormat] = useState("DD-MMM-YYYY HH:mm Z");
   const [showCertificateSubject, setShowCertificateSubject] = useState(false);
+  const [certificateSubject, setCertificateSubject] = useState("");
   const [signingReason, setSigningReason] = useState("");
   const [showSigningReason, setShowSigningReason] = useState(false);
   const [signingLocation, setSigningLocation] = useState("");
@@ -81,62 +82,61 @@ const Home = () => {
     }));
   };
 
- const renderSignature = () => {
-   let dscName = (
-     <span style={{ textTransform:"uppercase",position:"absolute" }}>
-       Akshata Chandrashekhar Bhimnale
-     </span>
-   );
-   let dscTitle = (
-     <span style={{ fontWeight: "500", fontSize: "24px" }}>
-       Signature valid
-     </span>
-   ); // Larger and bold font for dscTitle
-   let fullSignature = (
-     <span>
-       {dscTitle}
-       {"\n"}Digitally signed by {dscName}
-     </span>
-   );
+  const renderSignature = () => {
+    let dscName = (
+      <span style={{ textTransform: "uppercase", position: "absolute" }}>
+        Akshata Chandrashekhar Bhimnale
+      </span>
+    );
+    let dscTitle = (
+      <span style={{ fontWeight: "500", fontSize: "24px" }}>
+        Signature valid
+      </span>
+    ); // Larger and bold font for dscTitle
+    let fullSignature = (
+      <span>
+        {dscTitle}
+        {"\n"}Digitally signed by {dscName}
+      </span>
+    );
 
-   if (showCertificateSubject) {
-     fullSignature = (
-       <span>
-         {fullSignature}
-         {"\n"}Certificate Subject
-       </span>
-     );
-   }
-   if (showDateTime) {
-     const dateTime = moment().format(dateTimeFormat);
-     fullSignature = (
-       <span>
-         {fullSignature}
-         {"\n"}
-         {dateTime}
-       </span>
-     );
-   }
-   if (showSigningReason && signingReason) {
-     fullSignature = (
-       <span>
-         {fullSignature}
-         {"\n"}Reason: {signingReason}
-       </span>
-     );
-   }
-   if (showSigningLocation && signingLocation) {
-     fullSignature = (
-       <span>
-         {fullSignature}
-         {"\n"}Location: {signingLocation}
-       </span>
-     );
-   }
+    if (showCertificateSubject && certificateSubject) {
+      fullSignature = (
+        <span>
+          {fullSignature}
+          {"\n"}Certificate Subject: {certificateSubject}
+        </span>
+      );
+    }
+    if (showDateTime) {
+      const dateTime = moment().format(dateTimeFormat);
+      fullSignature = (
+        <span>
+          {fullSignature}
+          {"\n"}
+          {dateTime}
+        </span>
+      );
+    }
+    if (showSigningReason && signingReason) {
+      fullSignature = (
+        <span>
+          {fullSignature}
+          {"\n"}Reason: {signingReason}
+        </span>
+      );
+    }
+    if (showSigningLocation && signingLocation) {
+      fullSignature = (
+        <span>
+          {fullSignature}
+          {"\n"}Location: {signingLocation}
+        </span>
+      );
+    }
 
-   return fullSignature;
- };
-
+    return fullSignature;
+  };
 
   const runPythonScript = async () => {
     try {
@@ -193,6 +193,15 @@ const Home = () => {
             Show Certificate Subject
           </label>
         </div>
+        {showCertificateSubject && (
+          <input
+            type="text"
+            placeholder="Enter signing subject"
+            value={certificateSubject}
+            onChange={(e) => setCertificateSubject(e.target.value)}
+            style={{ marginBottom: "10px", width: "100%" }}
+          />
+        )}
 
         {/* Signing Reason Checkbox and Input */}
         <div style={{ marginBottom: "10px" }}>
@@ -355,9 +364,7 @@ const Home = () => {
               onChange={handleDateTimeFormatChange}
               style={{ marginLeft: "10px", width: "100%" }}
             >
-              <option value="DD-MMM-YYYY HH:mm Z">
-                DD-MMM-YYYY HH:mm Z
-              </option>
+              <option value="DD-MMM-YYYY HH:mm Z">DD-MMM-YYYY HH:mm Z</option>
               <option value="YYYY-MM-DD HH:mm:ss">YYYY-MM-DD HH:mm:ss</option>
               <option value="MM/DD/YYYY h:mm A">MM/DD/YYYY h:mm A</option>
               <option value="dddd, MMMM Do YYYY">dddd, MMMM Do YYYY</option>
