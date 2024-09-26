@@ -1,6 +1,7 @@
 import moment from "moment";
 import React, { useRef, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
+import { Button, TextField, FormControl, InputLabel, Select, MenuItem, FormControlLabel,FormLabel, Checkbox, Box, Grid, RadioGroup, Radio} from '@mui/material';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -55,7 +56,47 @@ const Home = () => {
     setSignaturePosition({
       x: e.clientX - rect.left - data.x,
       y: e.clientY - rect.top - data.y,
-    });
+    });   {showImage && (
+      <Box sx={{ marginBottom: "10px" }}>
+        {/* File input for image upload */}
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleImageChange}
+          style={{ marginBottom: "10px" }}
+        />
+
+        {/* Image Mode Radio Buttons */}
+        <FormControl component="fieldset" sx={{ marginBottom: "16px" }}>
+  <FormLabel component="legend" sx={{ marginBottom: "8px" }}>Image Mode</FormLabel>
+  <RadioGroup
+    row
+    name="imageMode"
+    value={imageMode}
+    onChange={(e) => setImageMode(e.target.value)}
+  >
+    <FormControlLabel
+      value="imageAndText"
+      control={<Radio />}
+      label="Image and Text"
+      sx={{ marginRight: "16px" }}
+    />
+    <FormControlLabel
+      value="imageAsBackground"
+      control={<Radio />}
+      label="Image as Background"
+      sx={{ marginRight: "16px" }}
+    />
+    <FormControlLabel
+      value="imageWithoutText"
+      control={<Radio />}
+      label="Image without Text"
+    />
+  </RadioGroup>
+</FormControl>
+
+      </Box>
+    )}
   };
 
   const onDragOver = (e) => {
@@ -156,229 +197,258 @@ const Home = () => {
     >
       {/* Left side: Controls */}
       <div
-        style={{ width: "30%", padding: "20px", borderRight: "1px solid #ccc" }}
+        style={{ width: "30%",height: "100vh", padding: "20px", borderRight: "1px solid #ccc" }}
       >
-        <button onClick={runPythonScript}>Run Python Script</button>
-        <h3>Signature Settings</h3>
+        <Box mb={3} textAlign="left">
+    <Button variant="contained" color="primary" onClick={runPythonScript}>
+      Run Python Script
+    </Button>
+  </Box>
 
         {/* Signature Text Input */}
+        <h2 style={{ color: "#333", textAlign: "center" }}>Signature Settings</h2>
 
+        
         {/* Font Size Selector */}
-        <div style={{ marginBottom: "10px" }}>
-          <label>Font Size:</label>
-          <select
-            value={fontSize}
-            onChange={handleFontSizeChange}
-            style={{ marginLeft: "10px" }}
-          >
-            <option value="20">Default Size</option>
-            {[...Array(21).keys()]
-              .map((i) => i * 2 + 2)
-              .map((size) => (
-                <option key={size} value={size}>
-                  {size}
-                </option>
-              ))}
-          </select>
-        </div>
+       <FormControl variant="outlined" size="small" fullWidth style={{ marginBottom: "20px" }}>
+    <InputLabel>Font Size</InputLabel>
+    <Select
+      value={fontSize}
+      onChange={handleFontSizeChange}
+      label="Font Size"
+    >
+      <MenuItem value={20}>Default Size</MenuItem>
+      {[...Array(21).keys()].map(i => i * 2 + 2).map(size => (
+        <MenuItem key={size} value={size}>{size}</MenuItem>
+      ))}
+    </Select>
+  </FormControl>
 
         {/* Show Certificate Subject Checkbox */}
-        <div style={{ marginBottom: "10px" }}>
-          <label>
-            <input
-              type="checkbox"
-              checked={showCertificateSubject}
-              onChange={(e) => setShowCertificateSubject(e.target.checked)}
-            />
-            Show Certificate Subject
-          </label>
-        </div>
-        {showCertificateSubject && (
-          <input
-            type="text"
-            placeholder="Enter signing subject"
-            value={certificateSubject}
-            onChange={(e) => setCertificateSubject(e.target.value)}
-            style={{ marginBottom: "10px", width: "100%" }}
+        <Box sx={{ marginBottom: "10px" }}>
+      <FormControlLabel
+        control={
+          <Checkbox
+            checked={showCertificateSubject}
+            onChange={(e) => setShowCertificateSubject(e.target.checked)}
           />
-        )}
+        }
+        label="Show Certificate Subject"
+      />
+      {showCertificateSubject && (
+        <TextField
+          fullWidth
+          placeholder="Enter signing subject"
+          value={certificateSubject}
+          onChange={(e) => setCertificateSubject(e.target.value)}
+          sx={{ marginBottom: "10px" }}
+        />
+      )}
+    </Box>
 
         {/* Signing Reason Checkbox and Input */}
-        <div style={{ marginBottom: "10px" }}>
-          <label>
-            <input
-              type="checkbox"
-              checked={showSigningReason}
-              onChange={(e) => setShowSigningReason(e.target.checked)}
-            />
-            Signing Reason Required
-          </label>
-        </div>
-        {showSigningReason && (
-          <input
-            type="text"
-            placeholder="Enter signing reason"
-            value={signingReason}
-            onChange={(e) => setSigningReason(e.target.value)}
-            style={{ marginBottom: "10px", width: "100%" }}
+        <Box sx={{ marginBottom: "10px" }}>
+      <FormControlLabel
+        control={
+          <Checkbox
+            checked={showSigningReason}
+            onChange={(e) => setShowSigningReason(e.target.checked)}
           />
-        )}
+        }
+        label="Signing Reason Required"
+      />
+      {showSigningReason && (
+        <TextField
+          fullWidth
+          placeholder="Enter signing reason"
+          value={signingReason}
+          onChange={(e) => setSigningReason(e.target.value)}
+          sx={{ marginBottom: "10px" }}
+        />
+      )}
+    </Box>
 
         {/* Signing Location Checkbox and Input */}
-        <div style={{ marginBottom: "10px" }}>
-          <label>
-            <input
-              type="checkbox"
-              checked={showSigningLocation}
-              onChange={(e) => setShowSigningLocation(e.target.checked)}
-            />
-            Signing Location Required
-          </label>
-        </div>
-        {showSigningLocation && (
-          <input
-            type="text"
-            placeholder="Enter signing location"
-            value={signingLocation}
-            onChange={(e) => setSigningLocation(e.target.value)}
-            style={{ marginBottom: "10px", width: "100%" }}
+        <Box sx={{ marginBottom: "10px" }}>
+      <FormControlLabel
+        control={
+          <Checkbox
+            checked={showSigningLocation}
+            onChange={(e) => setShowSigningLocation(e.target.checked)}
           />
-        )}
+        }
+        label="Signing Location Required"
+      />
+      {showSigningLocation && (
+        <TextField
+          fullWidth
+          placeholder="Enter signing location"
+          value={signingLocation}
+          onChange={(e) => setSigningLocation(e.target.value)}
+          sx={{ marginBottom: "10px" }}
+        />
+      )}
+    </Box>
 
         {/* Place an Image in Signing Box Checkbox */}
-        <div style={{ marginBottom: "10px" }}>
-          <label>
-            <input
-              type="checkbox"
-              checked={showImage}
-              onChange={(e) => setShowImage(e.target.checked)}
-            />
-            Place an Image in Signing Box
-          </label>
-        </div>
-        {showImage && (
-          <div style={{ marginBottom: "10px" }}>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              style={{ marginBottom: "10px" }}
-            />
+        <Box sx={{ marginBottom: "10px" }}>
+      <FormControlLabel
+        control={
+          <Checkbox
+            checked={showImage}
+            onChange={(e) => setShowImage(e.target.checked)}
+          />
+        }
+        label="Place an Image in Signing Box"
+      />
+    </Box>
+    {showImage && (
+        <Box sx={{ marginBottom: "10px" }}>
+          {/* File input for image upload */}
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            style={{ marginBottom: "10px" }}
+          />
 
-            {/* Image Mode Radio Buttons */}
-            <div style={{ marginBottom: "10px" }}>
-              <label>
-                <input
-                  type="radio"
-                  name="imageMode"
-                  value="imageAndText"
-                  checked={imageMode === "imageAndText"}
-                  onChange={(e) => setImageMode(e.target.value)}
-                />
-                Image and Text
-              </label>
-              <label style={{ marginLeft: "10px" }}>
-                <input
-                  type="radio"
-                  name="imageMode"
-                  value="imageAsBackground"
-                  checked={imageMode === "imageAsBackground"}
-                  onChange={(e) => setImageMode(e.target.value)}
-                />
-                Image as Background
-              </label>
-              <label style={{ marginLeft: "10px" }}>
-                <input
-                  type="radio"
-                  name="imageMode"
-                  value="imageWithoutText"
-                  checked={imageMode === "imageWithoutText"}
-                  onChange={(e) => setImageMode(e.target.value)}
-                />
-                Image without Text
-              </label>
-            </div>
-          </div>
-        )}
-
+          {/* Image Mode Radio Buttons */}
+          <FormControl component="fieldset" sx={{ marginBottom: "10px" }}>
+            <FormLabel component="legend">Image Mode</FormLabel>
+            <RadioGroup
+              row
+              name="imageMode"
+              value={imageMode}
+              onChange={(e) => setImageMode(e.target.value)}
+            >
+              <FormControlLabel
+                value="imageAndText"
+                control={<Radio />}
+                label="Image and Text"
+              />
+              <FormControlLabel
+                value="imageAsBackground"
+                control={<Radio />}
+                label="Image as Background"
+                sx={{ marginLeft: "10px" }}
+              />
+              <FormControlLabel
+                value="imageWithoutText"
+                control={<Radio />}
+                label="Image without Text"
+                sx={{ marginLeft: "10px" }}
+              />
+            </RadioGroup>
+          </FormControl>
+        </Box>
+      )}
         {/* Signing Box Dimensions Checkbox */}
-        <div style={{ marginBottom: "10px" }}>
-          <label>
-            <input
-              type="checkbox"
-              checked={showBoxDimensions}
-              onChange={(e) => setShowBoxDimensions(e.target.checked)}
-            />
-            Customize Signing Box Height and Width
-          </label>
-        </div>
-        {showBoxDimensions && (
-          <div style={{ marginBottom: "10px" }}>
-            <label>Width:</label>
-            <select
-              name="width"
-              value={boxDimensions.width}
-              onChange={handleBoxDimensionsChange}
-              style={{ marginLeft: "10px" }}
-            >
-              {[...Array(100).keys()].map((i) => (
-                <option key={i + 1} value={i + 1}>
-                  {i + 1}%
-                </option>
-              ))}
-            </select>
+        <Box sx={{ marginBottom: "10px" }}>
+      {/* Checkbox for showing/hiding box dimensions */}
+      <FormControlLabel
+        control={
+          <Checkbox
+            checked={showBoxDimensions}
+            onChange={(e) => setShowBoxDimensions(e.target.checked)}
+          />
+        }
+        label="Customize Signing Box Height and Width"
+      />
 
-            <label style={{ marginLeft: "20px" }}>Height:</label>
-            <select
-              name="height"
-              value={boxDimensions.height}
-              onChange={handleBoxDimensionsChange}
-              style={{ marginLeft: "10px" }}
-            >
-              {[...Array(100).keys()].map((i) => (
-                <option key={i + 1} value={i + 1}>
-                  {i + 1}%
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
+{showBoxDimensions && (
+  <Grid container spacing={2} sx={{ marginTop: 2 }}>
+    {/* Width Dropdown */}
+    <Grid item xs={6}>
+      <FormControl fullWidth>
+        <InputLabel id="width-label">Width</InputLabel>
+        <Select
+          labelId="width-label"
+          id="width-select"
+          name="width"
+          value={boxDimensions.width}
+          onChange={handleBoxDimensionsChange}
+          label="Width"
+        >
+          {[...Array(100).keys()].map((i) => (
+            <MenuItem key={i + 1} value={i + 1}>
+              {i + 1}%
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    </Grid>
+
+    {/* Height Dropdown */}
+    <Grid item xs={6}>
+      <FormControl fullWidth>
+        <InputLabel id="height-label">Height</InputLabel>
+        <Select
+          labelId="height-label"
+          id="height-select"
+          name="height"
+          value={boxDimensions.height}
+          onChange={handleBoxDimensionsChange}
+          label="Height"
+        >
+          {[...Array(100).keys()].map((i) => (
+            <MenuItem key={i + 1} value={i + 1}>
+              {i + 1}%
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    </Grid>
+  </Grid>
+)}
+
+    </Box>
         {/* Show Date/Time Checkbox */}
-        <div style={{ marginBottom: "10px" }}>
-          <label>
-            <input
-              type="checkbox"
-              checked={showDateTime}
-              onChange={handleDateTimeCheckboxChange}
-            />
-            Show Sign Date/Time
-          </label>
-        </div>
+        <Box sx={{ marginBottom: "10px" }}>
+      {/* Checkbox for showing/hiding date/time format selector */}
+      <FormControlLabel
+        control={
+          <Checkbox
+            checked={showDateTime}
+            onChange={handleDateTimeCheckboxChange}
+          />
+        }
+        label="Show Sign Date/Time"
+      />
 
-        {/* Date/Time Format Selector (only shows if checkbox is checked) */}
-        {showDateTime && (
-          <div style={{ marginBottom: "10px" }}>
-            <label>Date/Time Format:</label>
-            <select
-              value={dateTimeFormat}
-              onChange={handleDateTimeFormatChange}
-              style={{ marginLeft: "10px", width: "100%" }}
-            >
-              <option value="DD-MMM-YYYY HH:mm Z">DD-MMM-YYYY HH:mm Z</option>
-              <option value="YYYY-MM-DD HH:mm:ss">YYYY-MM-DD HH:mm:ss</option>
-              <option value="MM/DD/YYYY h:mm A">MM/DD/YYYY h:mm A</option>
-              <option value="dddd, MMMM Do YYYY">dddd, MMMM Do YYYY</option>
-              <option value="DD-MM-YYYY HH:mm">DD-MM-YYYY HH:mm</option>
-            </select>
-          </div>
-        )}
+      {/* Date/Time Format Selector (only shows if checkbox is checked) */}
+      {showDateTime && (
+        <FormControl fullWidth sx={{ marginTop: 2 }}>
+          <InputLabel>Date/Time Format</InputLabel>
+          <Select
+            value={dateTimeFormat}
+            onChange={handleDateTimeFormatChange}
+            label="Date/Time Format"
+          >
+            <MenuItem value="DD-MMM-YYYY HH:mm Z">DD-MMM-YYYY HH:mm Z</MenuItem>
+            <MenuItem value="YYYY-MM-DD HH:mm:ss">YYYY-MM-DD HH:mm:ss</MenuItem>
+            <MenuItem value="MM/DD/YYYY h:mm A">MM/DD/YYYY h:mm A</MenuItem>
+            <MenuItem value="dddd, MMMM Do YYYY">dddd, MMMM Do YYYY</MenuItem>
+            <MenuItem value="DD-MM-YYYY HH:mm">DD-MM-YYYY HH:mm</MenuItem>
+          </Select>
+        </FormControl>
+      )}
+    </Box>
         {/* PDF File Upload */}
+        <Box sx={{ marginBottom: "10px" }}>
+      <Button
+        variant="contained"
+        component="label"
+        sx={{ marginBottom: "10px" }}
+      >
+        Choose PDF File
         <input
           type="file"
           accept="application/pdf"
           onChange={onFileChange}
-          style={{ marginBottom: "10px" }}
+          hidden
         />
+      </Button>
+    </Box>
       </div>
 
       {/* Right side: PDF Preview with Signature */}
