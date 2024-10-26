@@ -1,12 +1,12 @@
-const fs = require('fs');
-const path = require('path');
-const { dialog } = require('electron');
+const fs = require("fs");
+const path = require("path");
+const { dialog } = require("electron");
 
 async function selectFolder() {
   const result = await dialog.showOpenDialog({
-    properties: ['openDirectory'],
+    properties: ["openDirectory"],
   });
-  return result.filePaths[0]; // Return the selected folder path
+  return result.filePaths[0];
 }
 
 async function copyFiles(sourcePath, destinationPath) {
@@ -20,7 +20,7 @@ async function copyFiles(sourcePath, destinationPath) {
       fs.copyFileSync(sourceFile, destFile);
     }
 
-    return 'Files copied successfully!';
+    return "Files copied successfully!";
   } catch (error) {
     return `Error copying files: ${error.message}`;
   }

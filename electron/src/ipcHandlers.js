@@ -1,8 +1,14 @@
 const { ipcMain } = require("electron");
 const { selectFolder, copyFiles } = require("../ipc/fileCopy");
+const { getListConnectedDsc } = require("../ipc/accessDsc.js");
 const { runPythonScript } = require("./pythonExecutor");
 
 function setupIPCHandlers() {
+  ipcMain.handle("list-DSC", async () => {
+    const listConnectedDsc = getListConnectedDsc();
+    return listConnectedDsc;
+  });
+
   ipcMain.handle("select-folder", async () => {
     const folderPath = await selectFolder();
     return folderPath;
