@@ -1,0 +1,33 @@
+.dsc-info {
+  font-family: Arial, sans-serif;
+  margin: 10px auto;
+  color: #696969;
+  overflow: hidden;
+  word-wrap: break-word; /* Ensures long words break within the container */
+}
+
+.title {
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.card {
+  border: 1px solid #ddd;
+  padding: 8px;
+  font-size: 14px;
+}
+
+.info-item {
+  margin: 4px 0;
+  word-wrap: break-word; /* Allows long text to wrap within the container */
+  overflow: hidden;
+}
+
+.error {
+  color: red;
+  word-wrap: break-word;
+}
+
+.loading {
+  color: #666;
+}

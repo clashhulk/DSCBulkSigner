@@ -23,6 +23,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import { toast, ToastContainer } from "react-toastify";
 
+import DSCInfo from "../../components/DSCInfo/DSCInfo";
+
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 const Home = () => {
@@ -52,6 +54,8 @@ const Home = () => {
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
   const [selecteDSC, setSelecteDSC] = useState(null);
+
+  const [dscInfo, setDscInfo] = useState();
 
   const signatureRef = useRef(null);
 
@@ -117,6 +121,7 @@ const Home = () => {
         if (data.status === "success") {
           toast.success("DSC verified successfully!");
           console.log("DSC Information:", data.data);
+          setDscInfo(data.data[0]);
         } else {
           toast.error(data.message || "Failed to verify DSC.");
         }
@@ -216,7 +221,7 @@ const Home = () => {
   const renderSignature = () => {
     let dscName = (
       <span style={{ textTransform: "uppercase", position: "absolute" }}>
-        Akshata Chandrashekhar Bhimnale
+        {dscInfo && dscInfo.label ? dscInfo.label : "No label available"}
       </span>
     );
     let dscTitle = (
@@ -327,6 +332,7 @@ const Home = () => {
 
           {/* Rest of your UI components here */}
         </div>
+        <DSCInfo dscInfo={dscInfo} loading={loading} />
         <Button
           variant="contained"
           component="label"
