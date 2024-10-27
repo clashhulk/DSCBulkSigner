@@ -1,3 +1,4 @@
+import "./styles.css";
 import "react-toastify/dist/ReactToastify.css";
 
 import {
@@ -30,6 +31,8 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/b
 const Home = () => {
   const [pdfFile, setPdfFile] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
+  const [sourceFolder, setSourceFolder] = useState("");
+  const [destinationFolder, setDestinationFolder] = useState("");
   const [signatureText, setSignatureText] = useState("Signature valid");
   const [signaturePosition, setSignaturePosition] = useState({ x: 50, y: 50 });
   const [fontSize, setFontSize] = useState(12);
@@ -135,6 +138,16 @@ const Home = () => {
     } else {
       toast.warn("Please enter a valid password.");
     }
+  };
+  const selectSourceFolder = async () => {
+    const folder = await window.api.selectFolder();
+    if (folder) setSourceFolder(folder);
+  };
+
+  // Function to select the destination folder
+  const selectDestinationFolder = async () => {
+    const folder = await window.api.selectFolder();
+    if (folder) setDestinationFolder(folder);
   };
 
   useEffect(() => {
@@ -346,6 +359,34 @@ const Home = () => {
             hidden
           />
         </Button>
+        <div className="folder-selection">
+          {/* Source Folder Section */}
+          <div className="source-folder">
+            <Button
+              variant="contained"
+              onClick={selectSourceFolder}
+              className="select-folder-button"
+            >
+              Source Folder
+            </Button>
+            {sourceFolder && <p className="folder-path ">{sourceFolder}</p>}
+          </div>
+
+          {/* Destination Folder Section */}
+          <div className="destination-folder">
+            <Button
+              variant="contained"
+              onClick={selectDestinationFolder}
+              className="select-folder-button"
+            >
+              Destination Folder
+            </Button>
+            {destinationFolder && (
+              <p className="folder-path ">{destinationFolder}</p>
+            )}
+          </div>
+        </div>
+
         {/* Signature Text Input */}
         <h2 style={{ color: "#333", textAlign: "center" }}>
           Signature Settings

@@ -1,6 +1,6 @@
 .dsc-info {
   font-family: Arial, sans-serif;
-  margin: 10px auto;
+  /* margin: 10px auto; */
   color: #696969;
   overflow: hidden;
   word-wrap: break-word; /* Ensures long words break within the container */
@@ -18,7 +18,6 @@
 }
 
 .info-item {
-  margin: 4px 0;
   word-wrap: break-word; /* Allows long text to wrap within the container */
   overflow: hidden;
 }

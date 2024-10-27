@@ -49,3 +49,39 @@ button.small-fab {
 .react-pdf__Page__annotations.annotationLayer {
   display: none !important;
 }
+
+.folder-selection {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+}
+
+.source-folder,
+.destination-folder {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 1;
+  margin-bottom: 10px;
+}
+
+.folder-label {
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.select-folder-button {
+  align-self: flex-start;
+}
+
+.folder-path {
+  color: #555;
+  font-size: 0.875rem;
+  background-color: #daffdc;
+  padding: 10px;
+  border-radius: 7px;
+}
+
+.folder-summary {
+  margin-top: 20px;
+}
