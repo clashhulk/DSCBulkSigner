@@ -51,6 +51,8 @@ const Home = () => {
   const [isPasswordPromptVisible, setIsPasswordPromptVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
+  const [selecteDSC, setSelecteDSC] = useState(null);
+
   const signatureRef = useRef(null);
 
   const onFileChange = (event) => {
@@ -81,15 +83,12 @@ const Home = () => {
       const data = result;
 
       if (data.status === "success" && data.data.length > 0) {
-        // Always use the first DSC from the list
         const firstDsc = data.data[0];
         console.log("Selected DSC:", firstDsc);
-
-        // Notify success and prompt for password
+        setSelecteDSC(data.data[0]);
         toast.success("DSC connected successfully. Please enter the password.");
         setIsPasswordPromptVisible(true);
       } else {
-        // No DSC connected
         toast.error("No DSC is connected. Please connect a DSC and try again.");
       }
     } catch (error) {
@@ -100,28 +99,39 @@ const Home = () => {
     }
   };
 
-  // Handle password input
   const handlePasswordChange = (event) => {
     setPassword(event.target.value);
   };
 
-  const handlePasswordSubmit = () => {
-    if (password.trim()) {
-      setLoadingMessage("Submitting password...");
+  const handlePasswordSubmit = async () => {
+    if (password.trim() && selecteDSC !== null) {
+      setLoadingMessage("Verifying DSC and retrieving information...");
       setLoading(true);
+      try {
+        const result = await window.api.verifyAndGetDscInfo(
+          selecteDSC,
+          password
+        );
+        const data = JSON.parse(result);
 
-      // Mock processing delay for password submission
-      setTimeout(() => {
-        toast.success("Password submitted successfully.");
-        setIsPasswordPromptVisible(false);
+        if (data.status === "success") {
+          toast.success("DSC verified successfully!");
+          console.log("DSC Information:", data.data);
+        } else {
+          toast.error(data.message || "Failed to verify DSC.");
+        }
+      } catch (error) {
+        console.error("Error verifying DSC:", error);
+        toast.error("An error occurred while verifying DSC. Please try again.");
+      } finally {
         setLoading(false);
-      }, 1000);
+        // setIsPasswordPromptVisible(false);
+      }
     } else {
       toast.warn("Please enter a valid password.");
     }
   };
 
-  // Check for connected DSC on component mount
   useEffect(() => {
     checkForConnectedDsc();
   }, []);
