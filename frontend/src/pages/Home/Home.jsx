@@ -1,7 +1,11 @@
+import "react-toastify/dist/ReactToastify.css";
+
 import {
+  Backdrop,
   Box,
   Button,
   Checkbox,
+  CircularProgress,
   FormControl,
   FormControlLabel,
   FormLabel,
@@ -12,10 +16,12 @@ import {
   RadioGroup,
   Select,
   TextField,
-} from '@mui/material';
-import moment from 'moment';
-import React, { useEffect, useRef, useState } from 'react';
-import { Document, Page, pdfjs } from 'react-pdf';
+  Typography,
+} from "@mui/material";
+import moment from "moment";
+import React, { useEffect, useRef, useState } from "react";
+import { Document, Page, pdfjs } from "react-pdf";
+import { toast, ToastContainer } from "react-toastify";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -41,7 +47,10 @@ const Home = () => {
     height: 8,
   });
   const [showBoxDimensions, setShowBoxDimensions] = useState(false);
-
+  const [password, setPassword] = useState("");
+  const [isPasswordPromptVisible, setIsPasswordPromptVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("");
   const signatureRef = useRef(null);
 
   const onFileChange = (event) => {
@@ -63,17 +72,58 @@ const Home = () => {
     );
   };
 
-  useEffect(() => {
-    const runScript = async () => {
-      try {
-        const result = await window.api.listConnectedDsc();
-        console.log(result);
-      } catch (error) {
-        console.error("Error listConnectedDsc:", error);
-      }
-    };
+  const checkForConnectedDsc = async () => {
+    setLoadingMessage("Checking for connected DSCs...");
+    setLoading(true);
 
-    runScript();
+    try {
+      const result = await window.api.listConnectedDsc();
+      const data = result;
+
+      if (data.status === "success" && data.data.length > 0) {
+        // Always use the first DSC from the list
+        const firstDsc = data.data[0];
+        console.log("Selected DSC:", firstDsc);
+
+        // Notify success and prompt for password
+        toast.success("DSC connected successfully. Please enter the password.");
+        setIsPasswordPromptVisible(true);
+      } else {
+        // No DSC connected
+        toast.error("No DSC is connected. Please connect a DSC and try again.");
+      }
+    } catch (error) {
+      console.error("Error checking for connected DSCs:", error);
+      toast.error("Failed to retrieve DSCs. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle password input
+  const handlePasswordChange = (event) => {
+    setPassword(event.target.value);
+  };
+
+  const handlePasswordSubmit = () => {
+    if (password.trim()) {
+      setLoadingMessage("Submitting password...");
+      setLoading(true);
+
+      // Mock processing delay for password submission
+      setTimeout(() => {
+        toast.success("Password submitted successfully.");
+        setIsPasswordPromptVisible(false);
+        setLoading(false);
+      }, 1000);
+    } else {
+      toast.warn("Please enter a valid password.");
+    }
+  };
+
+  // Check for connected DSC on component mount
+  useEffect(() => {
+    checkForConnectedDsc();
   }, []);
   const onDrop = (e) => {
     e.preventDefault();
@@ -209,14 +259,6 @@ const Home = () => {
     return fullSignature;
   };
 
-  const runPythonScript = async () => {
-    try {
-      const result = await window.api.runPythonScript();
-      console.log(result);
-    } catch (error) {
-      console.error("Error running Python script:", error);
-    }
-  };
   return (
     <div
       style={{
@@ -234,11 +276,47 @@ const Home = () => {
           borderRight: "1px solid #ccc",
         }}
       >
-        <Box mb={3} textAlign="left">
-          <Button variant="contained" color="primary" onClick={runPythonScript}>
-            Run Python Script
+        <div>
+          <ToastContainer />
+          <Backdrop
+            sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+            open={loading}
+          >
+            <CircularProgress color="inherit" />
+            <Typography variant="h6" sx={{ ml: 2 }}>
+              {loadingMessage}
+            </Typography>
+          </Backdrop>
+
+          {/* Display password prompt if a DSC token is connected */}
+          {isPasswordPromptVisible && (
+            <Box sx={{ marginBottom: "10px" }}>
+              <TextField
+                type="password"
+                label="DSC Password"
+                value={password}
+                onChange={handlePasswordChange}
+                fullWidth
+                sx={{ marginBottom: "10px" }}
+              />
+              <Button variant="contained" onClick={handlePasswordSubmit}>
+                Submit Password
+              </Button>
+            </Box>
+          )}
+
+          {/* Manual Check DSC Button */}
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={checkForConnectedDsc}
+            sx={{ marginBottom: "10px" }}
+          >
+            Check Connected DSC
           </Button>
-        </Box>
+
+          {/* Rest of your UI components here */}
+        </div>
         <Button
           variant="contained"
           component="label"

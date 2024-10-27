@@ -20,7 +20,7 @@ function executeCoreOperation(operation, ...args) {
 
       try {
         const result = JSON.parse(stdout);
-        resolve(result.result);
+        resolve(result);
       } catch (parseError) {
         handleError(
           `Error parsing JSON response from operation ${operation}: ${parseError}`

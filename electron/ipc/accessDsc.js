@@ -13,9 +13,7 @@ async function getListConnectedDsc() {
     return result;
   } catch (error) {
     console.error("Failed to get list of connected DSCs:", error);
-    // Optionally, rethrow the error or handle it differently
-    // throw error; // Uncomment if you want to propagate the error upwards
-    return error; // Return null or any other appropriate value on failure
+    return error;
   }
 }
 
