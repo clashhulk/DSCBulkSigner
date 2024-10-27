@@ -61,7 +61,7 @@ const Home = () => {
   const [dscInfo, setDscInfo] = useState();
 
   const signatureRef = useRef(null);
-
+  const toastId = useRef(null);
   const onFileChange = (event) => {
     setPdfFile(event.target.files[0]);
   };
@@ -93,8 +93,12 @@ const Home = () => {
         const firstDsc = data.data[0];
         console.log("Selected DSC:", firstDsc[0]);
         setSelecteDSC(data.data[0][0]);
-        toast.success("DSC connected successfully. Please enter the password.");
         setIsPasswordPromptVisible(true);
+        if (!toast.isActive(toastId.current)) {
+          toastId.current = toast.success(
+            "DSC connected successfully. Please enter the password."
+          );
+        }
       } else {
         toast.error("No DSC is connected. Please connect a DSC and try again.");
       }
@@ -388,9 +392,7 @@ const Home = () => {
         </div>
 
         {/* Signature Text Input */}
-        <h2 style={{ color: "#333", textAlign: "center" }}>
-          Signature Settings
-        </h2>
+        <h2 style={{ color: "#333" }}>Signature Settings</h2>
 
         {/* Font Size Selector */}
         <FormControl
