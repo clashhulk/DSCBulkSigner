@@ -1,8 +1,11 @@
 import json
 import PyKCS11
+import warnings
+from cryptography.utils import CryptographyDeprecationWarning
 from datetime import datetime
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
+warnings.filterwarnings("ignore", category=CryptographyDeprecationWarning)
 
 
 class PDFSigner:
@@ -43,8 +46,6 @@ class PDFSigner:
                     [
                         PyKCS11.CKA_LABEL,
                         PyKCS11.CKA_SERIAL_NUMBER,
-                        PyKCS11.CKA_SUBJECT,
-                        PyKCS11.CKA_ISSUER,
                         PyKCS11.CKA_VALUE
                     ]
                 )
@@ -53,29 +54,25 @@ class PDFSigner:
                 serial_number = ''.join(
                     f'{num:02X}' for num in attributes[1]) if attributes[1] else ""
 
-                def decode_der_to_rfc4514(encoded_list):
-                    try:
-                        return x509.Name.from_rfc4514_string(bytes(encoded_list).decode("utf-8", errors="ignore")).rfc4514_string()
-                    except Exception as e:
-                        return f"Error decoding: {e}"
-
-                subject = decode_der_to_rfc4514(
-                    attributes[2]) if attributes[2] else ""
-                issuer = decode_der_to_rfc4514(
-                    attributes[3]) if attributes[3] else ""
-
-                cert_value = bytes(attributes[4]) if attributes[4] else None
+                # Decode the full certificate to get subject and issuer
+                cert_value = bytes(attributes[2]) if attributes[2] else None
+                subject = issuer = ""
                 validity_period = {}
+
                 if cert_value:
                     try:
+                        # Load the full certificate to extract subject and issuer
                         cert = x509.load_der_x509_certificate(
                             cert_value, default_backend())
+                        subject = cert.subject.rfc4514_string()
+                        issuer = cert.issuer.rfc4514_string()
                         validity_period = {
                             "not_before": cert.not_valid_before.isoformat(),
                             "not_after": cert.not_valid_after.isoformat()
                         }
                     except Exception as e:
-                        print(f"Could not parse certificate validity: {e}")
+                        subject = f"Error decoding subject: {e}"
+                        issuer = f"Error decoding issuer: {e}"
 
                 cert_info.append({
                     "label": label,
@@ -101,6 +98,8 @@ class PDFSigner:
         except Exception as e:
             self.logout_and_close()
             return json.dumps({"status": "error", "message": str(e)})
+
+# Function to be called by `dispatch_operation`
 
 
 def get_dsc_info(dll_path, slot, pin):
