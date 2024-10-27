@@ -51,11 +51,11 @@ class PDFSigner(hsm.HSM):
             [(PyKCS11.CKA_CLASS, PyKCS11.CKO_CERTIFICATE)])
         for pk11object in pk11objects:
             attributes = self.session.getAttributeValue(
-                pk11object, [PyKCS11.CKA_VALUE, PyKCS11.CKA_ID])
+                pk11object, [PyKCS11.CKA_VALUE, PyKCS11.CKA_ID, PyKCS11.CKA_LABEL])
             if attributes:
                 # cert_id, cert_value
-                return attributes[1], bytes(attributes[0])
-        return None, None
+                return attributes[1], bytes(attributes[0]), attributes[2]
+        return None, None, None
 
     def sign(self, keyid, data, mech):
         mechanism = PyKCS11.Mechanism(PyKCS11.CKM_SHA256_RSA_PKCS, None)
@@ -95,6 +95,8 @@ class PDFSigner(hsm.HSM):
         date = datetime.datetime.now(
             timezone.utc).strftime('%Y%m%d%H%M%S+00\'00\'')
 
+        # Get certificate and private key id for signing
+        keyid, cert, label = self.certificate()
         # First signature dictionary for the first page
         dct = {
             "sigflags": 3,
@@ -105,12 +107,10 @@ class PDFSigner(hsm.HSM):
             "location": "Pune, Maharashtra",
             "reason": 'Document Approval',
             "signingdate": date.encode(),
-            "signature": 'Signed By : PRATAP SHAMRAO KHANDEKAR',
+            "signature": f'Signed By: {label}',
             "signaturebox": (0, 0, 100, 70),  # x1, y1, width, height
         }
 
-        # Get certificate and private key id for signing
-        keyid, cert = self.certificate()
         if not cert:
             raise Exception("Certificate could not be retrieved.")
 
@@ -137,7 +137,7 @@ class PDFSigner(hsm.HSM):
             "location": "Pune, Maharashtra",
             "reason": 'Document Approval',
             "signingdate": date.encode(),
-            "signature": 'Signed By : PRATAP SHAMRAO KHANDEKAR',
+            "signature": f'Signed By: {label}',
             "signaturebox": (0, 0, 100, 70),  # x1, y1, width, height
         }
 
