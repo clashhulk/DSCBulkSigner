@@ -84,8 +84,8 @@ const Home = () => {
 
       if (data.status === "success" && data.data.length > 0) {
         const firstDsc = data.data[0];
-        console.log("Selected DSC:", firstDsc);
-        setSelecteDSC(data.data[0]);
+        console.log("Selected DSC:", firstDsc[0]);
+        setSelecteDSC(data.data[0][0]);
         toast.success("DSC connected successfully. Please enter the password.");
         setIsPasswordPromptVisible(true);
       } else {
@@ -112,7 +112,7 @@ const Home = () => {
           selecteDSC,
           password
         );
-        const data = JSON.parse(result);
+        const data = result;
 
         if (data.status === "success") {
           toast.success("DSC verified successfully!");

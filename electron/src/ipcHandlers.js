@@ -1,6 +1,9 @@
 const { ipcMain } = require("electron");
 const { selectFolder, copyFiles } = require("../ipc/fileCopy");
-const { getListConnectedDsc } = require("../ipc/accessDsc.js");
+const {
+  getListConnectedDsc,
+  verifyAndGetDscInfo,
+} = require("../ipc/accessDsc.js");
 const { runPythonScript } = require("./pythonExecutor");
 
 function setupIPCHandlers() {
@@ -9,6 +12,10 @@ function setupIPCHandlers() {
     return listConnectedDsc;
   });
 
+  ipcMain.handle("login-DSC", async (event, slotId, pin) => {
+    const listConnectedDsc = verifyAndGetDscInfo(slotId, pin);
+    return listConnectedDsc;
+  });
   ipcMain.handle("select-folder", async () => {
     const folderPath = await selectFolder();
     return folderPath;
